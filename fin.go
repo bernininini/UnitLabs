@@ -67,8 +67,9 @@ const htmlTemplate = `
         .conversion-form {
             display: flex;
             flex-direction: column;
-            gap: 2.5rem;
+            gap: 2rem;
             align-items: center;
+            position: relative;
         }
 
         .input-group {
@@ -112,12 +113,12 @@ const htmlTemplate = `
         }
 
         #unitType {
-            position: fixed;
-            top: 20px;
-            right: 20px;
+            position: relative;
+            margin: 0 auto 2rem auto;
             width: auto;
-            padding: 0.5rem 2rem 0.5rem 0.8rem;
-            font-size: 0.9rem;
+            min-width: 150px;
+            padding: 0.8rem 2rem 0.8rem 1rem;
+            font-size: 1rem;
             background: transparent;
             color: white;
             border: 1px solid rgba(255,255,255,0.3);
@@ -127,18 +128,6 @@ const htmlTemplate = `
         #unitType::before {
             content: "Unit Type: ";
             opacity: 0.7;
-        }
-
-        #unitType {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 6px center;
-            background-size: 12px;
-        }
-
-        #unitType option {
-            background: #000000;
-            color: white;
         }
 
         input:focus, select:focus {
@@ -170,8 +159,26 @@ const htmlTemplate = `
         .input-group:nth-child(1) { animation-delay: 0.2s; }
         .input-group:nth-child(2) { animation-delay: 0.4s; }
 
-        .initial-load {
-            animation: none !important;
+        .convert-button {
+            background: #ffffff;
+            border: none;
+            padding: 1.2rem 2.5rem;
+            font-size: 1.2rem;
+            font-family: 'Space Grotesk', sans-serif;
+            color: #000000;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: slideIn 0.5s ease-out both;
+            animation-delay: 0.6s;
+        }
+
+        .convert-button:hover {
+            background: rgba(255,255,255,0.9);
+            transform: translateY(-2px);
+        }
+
+        .convert-button:active {
+            transform: translateY(0);
         }
     </style>
 </head>
@@ -181,7 +188,7 @@ const htmlTemplate = `
         <div class="subtitle">bernininini</div>
 
         <form method="POST" class="conversion-form" id="conversionForm">
-            <select name="unitType" id="unitType" onchange="this.form.submit()">
+            <select name="unitType" id="unitType">
                 {{range .UnitTypes}}
                     <option value="{{.}}" {{if eq . $.SelectedType}}selected{{end}}>{{.}}</option>
                 {{end}}
@@ -193,9 +200,8 @@ const htmlTemplate = `
                        step="any" 
                        required 
                        placeholder="Enter value" 
-                       value="{{.Value}}"
-                       oninput="this.form.submit()">
-                <select name="from" onchange="this.form.submit()">
+                       value="{{.Value}}">
+                <select name="from">
                     {{range .FromUnits}}
                         <option value="{{.}}" {{if eq . $.FromUnit}}selected{{end}}>{{.}}</option>
                     {{end}}
@@ -208,39 +214,23 @@ const htmlTemplate = `
                 <input type="text" 
                        value="{{if .Result}}{{.Result}}{{else}}?{{end}}" 
                        readonly>
-                <select name="to" onchange="this.form.submit()">
+                <select name="to">
                     {{range .ToUnits}}
                         <option value="{{.}}" {{if eq . $.ToUnit}}selected{{end}}>{{.}}</option>
                     {{end}}
                 </select>
             </div>
+
+            <button type="submit" class="convert-button">Convert</button>
         </form>
     </div>
 
     <script>
         window.onload = function() {
-            const form = document.getElementById('conversionForm');
-            const inputs = form.querySelectorAll('input[type="number"], select');
-            const resultInput = document.querySelector('input[readonly]');
-            
-            // Check if this is a form submission reload
-            if (performance.navigation.type === 1 || document.referrer.includes(window.location.host)) {
-                // Add class to disable animations
-                document.querySelectorAll('[class*="animation"]').forEach(el => {
-                    el.classList.add('initial-load');
-                });
-            }
-
-            // Store the current input value and cursor position
-            const valueInput = document.querySelector('input[name="value"]');
-            if (valueInput) {
-                const value = valueInput.value;
-                const position = valueInput.selectionStart;
-                
-                // Restore focus and cursor position after form submission
-                valueInput.focus();
-                valueInput.setSelectionRange(position, position);
-            }
+            document.querySelector('input[name="value"]').focus();
+            document.querySelector('#unitType').addEventListener('change', function() {
+                document.getElementById('conversionForm').submit();
+            });
         }
     </script>
 </body>
