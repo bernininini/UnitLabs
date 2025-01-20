@@ -169,6 +169,10 @@ const htmlTemplate = `
 
         .input-group:nth-child(1) { animation-delay: 0.2s; }
         .input-group:nth-child(2) { animation-delay: 0.4s; }
+
+        .initial-load {
+            animation: none !important;
+        }
     </style>
 </head>
 <body>
@@ -217,12 +221,26 @@ const htmlTemplate = `
         window.onload = function() {
             const form = document.getElementById('conversionForm');
             const inputs = form.querySelectorAll('input[type="number"], select');
+            const resultInput = document.querySelector('input[readonly]');
+            
+            // Check if this is a form submission reload
+            if (performance.navigation.type === 1 || document.referrer.includes(window.location.host)) {
+                // Add class to disable animations
+                document.querySelectorAll('[class*="animation"]').forEach(el => {
+                    el.classList.add('initial-load');
+                });
+            }
 
-            inputs.forEach(input => {
-                input.addEventListener('change', () => form.submit());
-            });
-
-            document.querySelector('input[name="value"]').focus();
+            // Store the current input value and cursor position
+            const valueInput = document.querySelector('input[name="value"]');
+            if (valueInput) {
+                const value = valueInput.value;
+                const position = valueInput.selectionStart;
+                
+                // Restore focus and cursor position after form submission
+                valueInput.focus();
+                valueInput.setSelectionRange(position, position);
+            }
         }
     </script>
 </body>
