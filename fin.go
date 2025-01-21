@@ -280,7 +280,7 @@ func handleConvert(w http.ResponseWriter, r *http.Request) {
 				if err != nil {
 					data.Result = "?"
 				} else {
-					data.Result = fmt.Sprintf("%.5f", result)
+					data.Result = fmt.Sprintf("%.2f", result)
 				}
 			}
 		}
