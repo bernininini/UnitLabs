@@ -7,15 +7,16 @@ import (
 	"strconv"
 )
 
+// PAGE DATA STRUCT
 type PageData struct {
-	Result       string
-	UnitTypes    []string
-	FromUnits    []string
-	ToUnits      []string
-	SelectedType string
-	Value        string
-	FromUnit     string
-	ToUnit       string
+	Result       string   // RESULT
+	UnitTypes    []string // UNIT TYPES
+	FromUnits    []string // UNITS (FROM)
+	ToUnits      []string // UNITS (TO)
+	SelectedType string   // SELECTED UNIT TYPE
+	Value        string   // INPUT VALUE
+	FromUnit     string   // SELECTED UNIT (FROM)
+	ToUnit       string   // SELECTED UNIT (TO)
 }
 
 const htmlTemplate = `
@@ -121,7 +122,7 @@ const htmlTemplate = `
             font-size: 1rem;
             background: transparent;
             color: white;
-            border: 1px solid rgba(255,255,255,0.3);
+            border: 3px solid rgba(255,255,255,0.3);
             animation: fadeIn 1s ease-out 1s both;
         }
 
@@ -193,7 +194,6 @@ const htmlTemplate = `
                     <option value="{{.}}" {{if eq . $.SelectedType}}selected{{end}}>{{.}}</option>
                 {{end}}
             </select>
-
             <div class="input-group">
                 <input type="number" 
                        name="value" 
@@ -207,9 +207,7 @@ const htmlTemplate = `
                     {{end}}
                 </select>
             </div>
-
             <div class="converting-text">CONVERTING TO.......</div>
-
             <div class="input-group">
                 <input type="text" 
                        value="{{if .Result}}{{.Result}}{{else}}?{{end}}" 
@@ -220,11 +218,9 @@ const htmlTemplate = `
                     {{end}}
                 </select>
             </div>
-
             <button type="submit" class="convert-button">Convert</button>
         </form>
     </div>
-
     <script>
         window.onload = function() {
             document.querySelector('input[name="value"]').focus();
@@ -237,12 +233,14 @@ const htmlTemplate = `
 </html>
 `
 
+// MAIN FUNCTION
 func main() {
 	http.HandleFunc("/", handleConvert)
 	fmt.Println("Server is running on http://localhost:8080")
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8080", nil) // START SERVER
 }
 
+// HANDLE CONVERT
 func handleConvert(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.New("converter").Parse(htmlTemplate)
 	if err != nil {
@@ -292,6 +290,7 @@ func handleConvert(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, data)
 }
 
+// GET UNITS
 func getUnitsForType(unitType string) ([]string, []string) {
 	units := map[string][]string{
 		"length":      {"meters", "feet", "inches", "kilometers", "centimeters", "miles", "yards"},
@@ -301,11 +300,12 @@ func getUnitsForType(unitType string) ([]string, []string) {
 	}
 
 	if unitList, ok := units[unitType]; ok {
-		return unitList, unitList
+		return unitList, unitList // RETURNING AVAILABLE UNITS
 	}
 	return []string{}, []string{}
 }
 
+// CONVERT
 func convert(value float64, from, to, unitType string) (float64, error) {
 	conversions := map[string]map[string]float64{
 		"length": {
@@ -349,6 +349,7 @@ func convert(value float64, from, to, unitType string) (float64, error) {
 	return 0, fmt.Errorf("invalid conversion")
 }
 
+// CONVERT TEMPERATURE
 func convertTemperature(value float64, from, to string) (float64, error) {
 	var celsius float64
 	switch from {
